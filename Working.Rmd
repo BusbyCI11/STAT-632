@@ -1,0 +1,96 @@
+---
+title: "Working"
+author: "Colin Busby"
+date: "2/3/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+pacman::p_load(tidyverse, Stat2Data, openintro)
+```
+
+```{r}
+# 2000 Election example -------------------------------
+
+data("PalmBeach")
+
+# scatterplot
+#pdf('figure/election_plot.pdf', width=4, height=3)
+lm1 <- lm(Buchanan ~ Bush, data=PalmBeach)
+par(mar=c(4,4,1.5,1.5))
+plot(Buchanan ~ Bush, data=PalmBeach,
+     ylab = "Buchanan votes", xlab = "Bush votes")
+abline(lm1)
+#dev.off()
+
+# plot of standardized residuals
+#pdf('figure/election_resid.pdf', width=4, height=3)
+par(mar=c(4,4,1.5,1.5))
+plot(PalmBeach$Buchanan, rstandard(lm1),
+     xlab = "Buchanan votes", ylab = "Standardized Residuals")
+abline(h=c(-2,2), lty=2)
+#dev.off()
+
+# identify outliers
+ind <- which(abs(rstandard(lm1)) > 2)
+PalmBeach[ind, ]
+
+# residuals versus leverage
+#pdf('figure/election_leverage.pdf', width=4, height=3)
+par(mar=c(4,4,1.5,1.5))
+plot(hatvalues(lm1), rstandard(lm1), 
+     xlab = "Leverage", ylab = "Standardized Residuals")
+n <- nrow(PalmBeach) # rstandard pulls out standardized residuals from model
+abline(v=4/n, lty=2) # threshold for high leverage
+abline(h=c(-2,2), lty=2) # threshold for outliers
+#dev.off()
+
+# In-Class Exercise - Identify and pull out high leverage counties
+ind2 <- which(hatvalues(lm1) > 4/n)
+PalmBeach[ind2, ]
+
+# identify bad leverage points
+ind <- which(abs(rstandard(lm1)) > 2 & hatvalues(lm1) > 4/n) # which() pulls out rows of data according to criteria
+PalmBeach[ind, ] # [rows, columns] ,so [ind rows, all columns]
+
+# QQplots-----------------
+set.seed(1)
+x <- rnorm(500)
+#pdf('figure/qqnorm1.pdf', width=7, height=3.5)
+par(mfrow=c(1,2))
+hist(x)
+qqnorm(x)
+qqline(x)
+#dev.off()
+
+
+#pdf('figure/qqexp1.pdf', width=7, height=3.5)
+par(mfrow=c(1,2))
+set.seed(1)
+x <- rexp(500) # random numbers from an exponential distribution
+hist(x)
+qqnorm(x)
+qqline(x)
+#dev.off()
+
+#pdf('figure/qqt1.pdf', width=7, height=3.5)
+par(mfrow=c(1,2))
+set.seed(1)
+x <- rt(500, df=5) # random numbers from an exponential distribution
+hist(x)
+qqnorm(x)
+qqline(x)
+#dev.off()
+
+bdims_males <- subset(bdims, sex == 1) 
+lm1 <- lm(wgt ~ hgt, data=bdims_males)
+#pdf('figure/qqres.pdf', width=7, height=3.5)
+par(mfrow=c(1,2))
+hist(resid(lm1))
+qqnorm(resid(lm1))
+qqline(resid(lm1))
+#dev.off()
+```
+
+
